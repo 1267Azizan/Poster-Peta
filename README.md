@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Generator Poster Peta Kota
 
 Buat poster peta yang indah dan minimalis untuk kota mana saja di dunia.
@@ -260,3 +260,4 @@ G = ox.graph_from_point(point, dist=dist, network_type='walk')   # pejalan kaki
 =======
 # Poster-Peta
 >>>>>>> 2b09ec72dabb9fc974da44a76ac4e00a1bdcc93e
+
