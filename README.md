@@ -3,6 +3,39 @@
 
 Buat poster peta yang indah dan minimalis untuk kota mana saja di dunia.
 
+## 🚀 Web Interface (Mudah Digunakan)
+
+Aplikasi ini sekarang memiliki antarmuka web yang memudahkan penggunaan tanpa perlu command line!
+
+### Cara Menjalankan Web Interface:
+
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   pip install flask
+   ```
+
+2. **Jalankan server web:**
+   ```bash
+   python app.py
+   ```
+
+3. **Buka browser dan akses:**
+   ```
+   http://localhost:5000
+   ```
+
+### Fitur Web Interface:
+
+- ✅ **Form input sederhana** - Pilih kota, negara, tema, dan pengaturan lainnya
+- 📊 **Progress bar real-time** - Lihat progress pembuatan poster
+- 📏 **Pilihan unit ukuran** - cm atau mm
+- 🎨 **Preview tema** - Pilih dari berbagai tema yang tersedia
+- 📥 **Download otomatis** - Poster langsung tersedia untuk diunduh
+- ⚡ **Asynchronous processing** - Tidak perlu menunggu lama di browser
+
+### Tangkapan Layar:
+
 <img src="posters/singapore_neon_cyberpunk_20260108_184503.png" width="250">
 <img src="posters/dubai_midnight_blue_20260108_174920.png" width="250">
 

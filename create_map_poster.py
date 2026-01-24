@@ -13,6 +13,9 @@ import argparse
 from pathlib import Path
 from hashlib import md5
 import pickle
+from concurrent.futures import ThreadPoolExecutor
+import geopandas as gpd
+from shapely.geometry import Point, box
 
 class CacheError(Exception):
     """Raised when a cache operation fails."""
@@ -22,6 +25,16 @@ CACHE_DIR_PATH = os.environ.get("CACHE_DIR", "cache")
 CACHE_DIR = Path(CACHE_DIR_PATH)
 
 CACHE_DIR.mkdir(exist_ok=True)
+OSM_CACHE_DIR = CACHE_DIR / "osmnx"
+OSM_CACHE_DIR.mkdir(exist_ok=True)
+
+# OSMnx settings for faster repeated requests
+ox.settings.use_cache = True
+ox.settings.cache_folder = str(OSM_CACHE_DIR)
+ox.settings.log_console = False
+
+# Network type can be overridden for more detail: set OSM_NETWORK_TYPE=all
+OSM_NETWORK_TYPE = os.environ.get("OSM_NETWORK_TYPE", "drive")
 
 def cache_file(key: str) -> str:
     encoded = md5(key.encode()).hexdigest()
@@ -33,6 +46,13 @@ def cache_get(name: str) -> dict | None:
         with path.open("rb") as f:
             return pickle.load(f)
     return None
+
+def _report_cache(cache_cb, name, hit):
+    if cache_cb:
+        try:
+            cache_cb(name, hit)
+        except Exception:
+            pass
 
 def cache_set(name: str, obj) -> None:
     path = CACHE_DIR / cache_file(name)
@@ -174,6 +194,8 @@ def get_edge_colors_by_type(G):
     Assigns colors to edges based on road type hierarchy.
     Returns a list of colors corresponding to each edge in the graph.
     """
+    if G is None:
+        raise ValueError("Graph tidak tersedia untuk pewarnaan jalan.")
     edge_colors = []
     
     for u, v, data in G.edges(data=True):
@@ -207,6 +229,8 @@ def get_edge_widths_by_type(G):
     Assigns line widths to edges based on road type.
     Major roads get thicker lines.
     """
+    if G is None:
+        raise ValueError("Graph tidak tersedia untuk lebar jalan.")
     edge_widths = []
     
     for u, v, data in G.edges(data=True):
@@ -245,8 +269,8 @@ def get_coordinates(city, country):
     print("Mencari koordinat...")
     geolocator = Nominatim(user_agent="city_map_poster", timeout=10)
     
-    # Add a small delay to respect Nominatim's usage policy
-    time.sleep(1)
+    # Reduce delay for faster processing (Nominatim still respects rate limits)
+    time.sleep(0.5)
     
     location = geolocator.geocode(f"{city}, {country}")
     
@@ -261,18 +285,23 @@ def get_coordinates(city, country):
     else:
         raise ValueError(f"Could not find coordinates for {city}, {country}")
 
-def fetch_graph(point, dist):
+def fetch_graph(point, dist, cache_cb=None):
     lat, lon = point
-    graph = f"graph_{lat}_{lon}_{dist}"
+    graph = f"graph_{lat}_{lon}_{dist}_{OSM_NETWORK_TYPE}"
     cached = cache_get(graph)
     if cached is not None:
         print("✓ Menggunakan jaringan jalan cache")
+        _report_cache(cache_cb, "streets", True)
         return cached
+    _report_cache(cache_cb, "streets", False)
 
     try:
-        G = ox.graph_from_point(point, dist=dist, dist_type='bbox', network_type='all')
+        G = ox.graph_from_point(point, dist=dist, dist_type='bbox', network_type=OSM_NETWORK_TYPE)
+        if G is None or len(G) == 0:
+            print(f"Warning: Empty graph returned for point {point}")
+            return None
         # Rate limit between requests
-        time.sleep(0.5)
+        time.sleep(0.3)
         try:
             cache_set(graph, G)
         except CacheError as e:
@@ -282,26 +311,32 @@ def fetch_graph(point, dist):
         print(f"Error OSMnx saat mengambil graph: {e}")
         return None
 
-def fetch_features(point, dist, tags, name):
+def fetch_features(point, dist, tags, name, cache_cb=None):
     lat, lon = point
     tag_str = "_".join(tags.keys())
     features = f"{name}_{lat}_{lon}_{dist}_{tag_str}"
     cached = cache_get(features)
     if cached is not None:
         print(f"✓ Menggunakan cache {name}")
+        _report_cache(cache_cb, name, True)
         return cached
+    _report_cache(cache_cb, name, False)
 
     try:
         data = ox.features_from_point(point, tags=tags, dist=dist)
+        # Return None if no features found instead of empty GeoDataFrame
+        if data is None or data.empty:
+            print(f"No {name} features found")
+            return None
         # Rate limit between requests
-        time.sleep(0.3)
+        time.sleep(0.2)
         try:
             cache_set(features, data)
         except CacheError as e:
             print(e)
         return data
     except Exception as e:
-        print(f"Error OSMnx saat mengambil fitur: {e}")
+        print(f"Error OSMnx saat mengambil fitur {name}: {e}")
         return None
 
 def fetch_subdistrict_boundary(subdistrict_name):
@@ -320,8 +355,8 @@ def fetch_subdistrict_boundary(subdistrict_name):
         if gdf.empty:
             print(f"⚠ Tidak dapat menemukan batas untuk '{subdistrict_name}'")
             return None
-        # Rate limit
-        time.sleep(0.5)
+        # Rate limit (reduced for faster processing)
+        time.sleep(0.2)
         try:
             cache_set(boundary_key, gdf)
         except CacheError as e:
@@ -331,20 +366,49 @@ def fetch_subdistrict_boundary(subdistrict_name):
         print(f"Error OSMnx saat mengambil batas kecamatan: {e}")
         return None
 
-def fetch_graph_from_polygon(boundary):
+def fetch_city_boundary(city_name):
+    """
+    Fetch the boundary polygon for a given city name.
+    """
+    boundary_key = f"boundary_city_{city_name.replace(' ', '_').replace(',', '')}"
+    cached = cache_get(boundary_key)
+    if cached is not None:
+        print("✓ Menggunakan batas kota cache")
+        return cached
+
+    try:
+        # Geocode the city to get its boundary
+        gdf = ox.geocode_to_gdf(city_name)
+        if gdf.empty:
+            print(f"⚠ Tidak dapat menemukan batas untuk '{city_name}'")
+            return None
+        # Rate limit (reduced for faster processing)
+        time.sleep(0.2)
+        try:
+            cache_set(boundary_key, gdf)
+        except CacheError as e:
+            print(e)
+        return gdf
+    except Exception as e:
+        print(f"Error OSMnx saat mengambil batas kota: {e}")
+        return None
+
+def fetch_graph_from_polygon(boundary, cache_cb=None):
     """
     Fetch street network within a polygon boundary.
     """
     # Create a cache key based on boundary geometry
-    boundary_key = f"graph_polygon_{hash(str(boundary.geometry.iloc[0]))}"
+    boundary_key = f"graph_polygon_{hash(str(boundary.geometry.iloc[0]))}_{OSM_NETWORK_TYPE}"
     cached = cache_get(boundary_key)
     if cached is not None:
         print("✓ Menggunakan jaringan jalan cache untuk polygon")
+        _report_cache(cache_cb, "streets", True)
         return cached
+    _report_cache(cache_cb, "streets", False)
 
     try:
-        G = ox.graph_from_polygon(boundary.geometry.iloc[0], network_type='all')
-        time.sleep(0.5)
+        G = ox.graph_from_polygon(boundary.geometry.iloc[0], network_type=OSM_NETWORK_TYPE)
+        time.sleep(0.2)
         try:
             cache_set(boundary_key, G)
         except CacheError as e:
@@ -354,7 +418,7 @@ def fetch_graph_from_polygon(boundary):
         print(f"Error OSMnx saat mengambil graph dari polygon: {e}")
         return None
 
-def fetch_features_from_polygon(boundary, tags, name):
+def fetch_features_from_polygon(boundary, tags, name, cache_cb=None):
     """
     Fetch features within a polygon boundary.
     """
@@ -363,11 +427,13 @@ def fetch_features_from_polygon(boundary, tags, name):
     cached = cache_get(boundary_key)
     if cached is not None:
         print(f"✓ Menggunakan cache {name} untuk polygon")
+        _report_cache(cache_cb, name, True)
         return cached
+    _report_cache(cache_cb, name, False)
 
     try:
         data = ox.features_from_polygon(boundary.geometry.iloc[0], tags=tags)
-        time.sleep(0.3)
+        time.sleep(0.15)
         try:
             cache_set(boundary_key, data)
         except CacheError as e:
@@ -377,57 +443,222 @@ def fetch_features_from_polygon(boundary, tags, name):
         print(f"Error OSMnx saat mengambil fitur dari polygon: {e}")
         return None
 
-def create_poster(city, country, point, dist, output_file, output_format, boundary=None, width_cm=30.48, height_cm=40.64, clean=False):
+def build_canvas_boundary(point, dist, width_inches, height_inches):
+    """
+    Build a rectangular boundary that matches the canvas aspect ratio,
+    centered on the point, so the map fills the page without stretching.
+    """
+    if point is None or dist is None:
+        return None
+    if width_inches <= 0 or height_inches <= 0:
+        return None
+
+    target_aspect = width_inches / height_inches
+    if target_aspect <= 0:
+        return None
+
+    # Use dist as half-size for the shorter side, expand the longer side.
+    if target_aspect >= 1:
+        half_width = dist * target_aspect
+        half_height = dist
+    else:
+        half_width = dist
+        half_height = dist / target_aspect
+
+    # Project point to meters, build rectangle, then reproject to lat/lon
+    center = Point(point[1], point[0])  # lon, lat
+    center_proj, proj_crs = ox.projection.project_geometry(center)
+    rect = box(
+        center_proj.x - half_width,
+        center_proj.y - half_height,
+        center_proj.x + half_width,
+        center_proj.y + half_height
+    )
+    rect_gdf = gpd.GeoDataFrame(geometry=[rect], crs=proj_crs).to_crs(epsg=4326)
+    return rect_gdf
+
+def project_gdf_safe(gdf):
+    """
+    Project GeoDataFrame to a suitable planar CRS.
+    Compatible across osmnx versions.
+    """
+    if gdf is None or gdf.empty:
+        return gdf
+    try:
+        if hasattr(ox, "project_gdf"):
+            return ox.project_gdf(gdf)
+        proj_mod = getattr(ox, "projection", None)
+        if proj_mod and hasattr(proj_mod, "project_gdf"):
+            return proj_mod.project_gdf(gdf)
+        if proj_mod and hasattr(proj_mod, "get_utm_crs"):
+            geom = gdf.unary_union
+            centroid = geom.centroid
+            crs = proj_mod.get_utm_crs(centroid.y, centroid.x)
+            return gdf.to_crs(crs)
+        if proj_mod and hasattr(proj_mod, "get_projected_crs"):
+            geom = gdf.unary_union
+            centroid = geom.centroid
+            crs = proj_mod.get_projected_crs(centroid.y, centroid.x)
+            return gdf.to_crs(crs)
+    except Exception:
+        pass
+    return gdf
+
+def create_poster(city, country, point, dist, output_file, output_format, boundary=None, width_cm=30.48, height_cm=40.64, clean=False, show_boundary_edge=True, progress_cb=None, dpi=None, quality=None, cache_cb=None, transparent_bg=False):
     print(f"\nMembuat peta untuk {city}, {country}...")
+
+    def report(status, message):
+        if progress_cb:
+            try:
+                progress_cb(status, message)
+            except Exception:
+                pass
     
     # Convert cm to inches (1 inch = 2.54 cm)
     width_inches = width_cm / 2.54
     height_inches = height_cm / 2.54
     print(f"Ukuran poster: {width_cm} cm x {height_cm} cm ({width_inches:.2f} inci x {height_inches:.2f} inci)")
     
+    # Build a boundary matching canvas aspect ratio to fill the page (non-stretch)
+    fetch_boundary = boundary
+    plot_boundary = boundary
+    if boundary is None and point is not None and dist is not None:
+        fetch_boundary = build_canvas_boundary(point, dist, width_inches, height_inches)
+
     # Progress bar for data fetching
     with tqdm(total=3, desc="Mengambil data peta", unit="step", bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt}') as pbar:
-        # 1. Fetch Street Network
+        # 1. Fetch Street Network (largest payload first)
         pbar.set_description("Mengunduh jaringan jalan")
-        if boundary is not None:
+        report("fetching_streets", "Mengunduh jaringan jalan...")
+        if fetch_boundary is not None:
             # Use boundary polygon
-            G = fetch_graph_from_polygon(boundary)
+            G = fetch_graph_from_polygon(fetch_boundary, cache_cb=cache_cb)
         else:
-            G = fetch_graph(point, dist)
+            G = fetch_graph(point, dist, cache_cb=cache_cb)
         pbar.update(1)
-        
-        # 2. Fetch Water Features
-        pbar.set_description("Mengunduh fitur air")
-        if boundary is not None:
-            water = fetch_features_from_polygon(boundary, {'natural': 'water', 'waterway': 'riverbank'}, 'water')
-        else:
-            water = fetch_features(point, dist, {'natural': 'water', 'waterway': 'riverbank'}, 'water')
-        pbar.update(1)
-        
-        # 3. Fetch Parks
-        pbar.set_description("Mengunduh taman/ruang hijau")
-        if boundary is not None:
-            parks = fetch_features_from_polygon(boundary, {'leisure': 'park', 'landuse': 'grass'}, 'parks')
-        else:
-            parks = fetch_features(point, dist, {'leisure': 'park', 'landuse': 'grass'}, 'parks')
-        pbar.update(1)
+
+        # 2-3. Fetch Water & Parks in parallel to reduce total wait time
+        pbar.set_description("Mengunduh fitur air & taman")
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            report("fetching_water", "Mengunduh fitur air...")
+            if fetch_boundary is not None:
+                water_future = executor.submit(
+                    fetch_features_from_polygon,
+                    fetch_boundary,
+                    {'natural': 'water', 'waterway': 'riverbank'},
+                    'water',
+                    cache_cb
+                )
+            else:
+                water_future = executor.submit(
+                    fetch_features,
+                    point,
+                    dist,
+                    {'natural': 'water', 'waterway': 'riverbank'},
+                    'water',
+                    cache_cb
+                )
+
+            report("fetching_parks", "Mengunduh taman dan ruang hijau...")
+            if fetch_boundary is not None:
+                parks_future = executor.submit(
+                    fetch_features_from_polygon,
+                    fetch_boundary,
+                    {'leisure': 'park', 'landuse': 'grass'},
+                    'parks',
+                    cache_cb
+                )
+            else:
+                parks_future = executor.submit(
+                    fetch_features,
+                    point,
+                    dist,
+                    {'leisure': 'park', 'landuse': 'grass'},
+                    'parks',
+                    cache_cb
+                )
+
+            water = water_future.result()
+            pbar.update(1)
+            parks = parks_future.result()
+            pbar.update(1)
     
+    if G is None:
+        raise ValueError("Gagal mengambil jaringan jalan (hasil kosong). Coba kurangi skala atau lokasi lain.")
+
     print("✓ Semua data berhasil diambil!")
+
+    display_point = point
+    if display_point is None and plot_boundary is not None and not plot_boundary.empty:
+        try:
+            boundary_wgs84 = plot_boundary
+            if boundary_wgs84.crs is not None and boundary_wgs84.crs.to_epsg() != 4326:
+                boundary_wgs84 = boundary_wgs84.to_crs(epsg=4326)
+            centroid = boundary_wgs84.geometry.iloc[0].centroid
+            display_point = (centroid.y, centroid.x)
+        except Exception as e:
+            print(f"Warning: Failed to compute centroid for coordinates: {e}")
     
-    # 2. Setup Plot
+    # Project layers to a common CRS to avoid stretching
+    projected_crs = None
+    boundary_for_projection = fetch_boundary if fetch_boundary is not None else plot_boundary
+    if boundary_for_projection is not None and not boundary_for_projection.empty:
+        boundary_for_projection = project_gdf_safe(boundary_for_projection)
+        projected_crs = boundary_for_projection.crs
+        if plot_boundary is not None and not plot_boundary.empty:
+            try:
+                plot_boundary = plot_boundary.to_crs(projected_crs)
+            except Exception as e:
+                print(f"Warning: Failed to project boundary for plotting: {e}")
+        try:
+            G = ox.project_graph(G, to_crs=projected_crs)
+        except Exception as e:
+            print(f"Warning: Failed to project graph to boundary CRS: {e}")
+    else:
+        try:
+            G = ox.project_graph(G)
+            projected_crs = G.graph.get("crs")
+        except Exception as e:
+            print(f"Warning: Failed to project graph: {e}")
+
+    if projected_crs is not None:
+        if water is not None and not water.empty:
+            try:
+                water = water.to_crs(projected_crs)
+            except Exception as e:
+                print(f"Warning: Failed to project water features: {e}")
+        if parks is not None and not parks.empty:
+            try:
+                parks = parks.to_crs(projected_crs)
+            except Exception as e:
+                print(f"Warning: Failed to project parks features: {e}")
+
+    # 2. Setup Plot with optimized settings
     print("Merender peta...")
-    fig, ax = plt.subplots(figsize=(width_inches, height_inches), facecolor=THEME['bg'])
-    ax.set_facecolor(THEME['bg'])
+    report("render_setup", "Menyiapkan kanvas render...")
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-interactive backend for faster rendering
+    # Use configurable DPI to balance speed vs quality
+    render_dpi = dpi if isinstance(dpi, (int, float)) and dpi > 0 else 150
+    fig_face = 'none' if transparent_bg else THEME['bg']
+    fig, ax = plt.subplots(figsize=(width_inches, height_inches), facecolor=fig_face, dpi=render_dpi)
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax.set_facecolor(fig_face)
     ax.set_position([0, 0, 1, 1])
+    ax.axis('off')  # Turn off axes for cleaner look and faster rendering
+    # Set aspect ratio BEFORE plotting to prevent stretching
+    ax.set_aspect('equal', adjustable='datalim')
     
     # 3. Plot Layers
     # Layer 1: Polygons (filter to only plot polygon/multipolygon geometries, not points)
+    report("render_layers_water", "Menggambar layer air...")
     if water is not None and not water.empty:
         # Filter to only polygon/multipolygon geometries to avoid point features showing as dots
         water_polys = water[water.geometry.type.isin(['Polygon', 'MultiPolygon'])]
         if not water_polys.empty:
             water_polys.plot(ax=ax, facecolor=THEME['water'], edgecolor='none', zorder=1)
     
+    report("render_layers_parks", "Menggambar layer ruang hijau...")
     if parks is not None and not parks.empty:
         # Filter to only polygon/multipolygon geometries to avoid point features showing as dots
         parks_polys = parks[parks.geometry.type.isin(['Polygon', 'MultiPolygon'])]
@@ -435,11 +666,15 @@ def create_poster(city, country, point, dist, output_file, output_format, bounda
             parks_polys.plot(ax=ax, facecolor=THEME['parks'], edgecolor='none', zorder=2)
     
     # Layer 1.5: Subdistrict Boundary (if provided)
-    if boundary is not None:
-        boundary.plot(ax=ax, facecolor='none', edgecolor='black', linewidth=2, zorder=2.5)
+    report("render_boundary", "Menggambar garis batas wilayah...")
+    if plot_boundary is not None and not plot_boundary.empty and show_boundary_edge:
+        # Use boundary color from theme if available, otherwise use text color
+        boundary_color = THEME.get('boundary', THEME.get('text', 'black'))
+        plot_boundary.plot(ax=ax, facecolor='none', edgecolor=boundary_color, linewidth=2, zorder=2.5)
     
     # Layer 2: Roads with hierarchy coloring
     print("Menerapkan warna hierarki jalan...")
+    report("render_roads", "Menggambar jaringan jalan...")
     edge_colors = get_edge_colors_by_type(G)
     edge_widths = get_edge_widths_by_type(G)
     
@@ -451,14 +686,17 @@ def create_poster(city, country, point, dist, output_file, output_format, bounda
         show=False, close=False
     )
     
-    # Layer 3: Gradients (Top and Bottom)
-    create_gradient_fade(ax, THEME['gradient_color'], location='bottom', zorder=10)
-    create_gradient_fade(ax, THEME['gradient_color'], location='top', zorder=10)
+    # Layer 3: Gradients (Top and Bottom) - skip for clean mode
+    if not clean:
+        report("render_gradients", "Menambahkan efek gradient...")
+        create_gradient_fade(ax, THEME['gradient_color'], location='bottom', zorder=10)
+        create_gradient_fade(ax, THEME['gradient_color'], location='top', zorder=10)
     
     # 4. Typography using Roboto font
     if not clean:
-        # Scale font sizes based on poster dimensions for better proportion
-        scale_factor = min(width_inches, height_inches) / 16.0  # Base on 16 inches height
+        report("render_text", "Menambahkan tipografi...")
+        # Scale font sizes based on poster width for consistent horizontal balance
+        scale_factor = width_inches / 16.0  # Base on 16 inches width
         base_font_size = 60 * scale_factor
         sub_font_size = 22 * scale_factor
         coords_font_size = 14 * scale_factor
@@ -495,19 +733,30 @@ def create_poster(city, country, point, dist, output_file, output_format, bounda
         ax.text(0.5, 0.14, spaced_city, transform=ax.transAxes,
                 color=THEME['text'], ha='center', fontproperties=font_main_adjusted, zorder=11)
         
-        ax.text(0.5, 0.10, country.upper(), transform=ax.transAxes,
-                color=THEME['text'], ha='center', fontproperties=font_sub, zorder=11)
+        # Only display country if it's not empty
+        if country.strip():
+            ax.text(0.5, 0.10, country.upper(), transform=ax.transAxes,
+                    color=THEME['text'], ha='center', fontproperties=font_sub, zorder=11)
+            coords_y = 0.07
+        else:
+            coords_y = 0.10  # Adjust coordinate position if no country
         
-        lat, lon = point
-        coords = f"{lat:.4f}° N / {lon:.4f}° E" if lat >= 0 else f"{abs(lat):.4f}° S / {lon:.4f}° E"
-        if lon < 0:
-            coords = coords.replace("E", "W")
-        
-        ax.text(0.5, 0.07, coords, transform=ax.transAxes,
-                color=THEME['text'], alpha=0.7, ha='center', fontproperties=font_coords, zorder=11)
-        
-        ax.plot([0.4, 0.6], [0.125, 0.125], transform=ax.transAxes, 
-                color=THEME['text'], linewidth=1, zorder=11)
+        # Display coordinates (point or centroid when using boundary)
+        if display_point is not None:
+            lat, lon = display_point
+            coords = f"{lat:.4f}° N / {lon:.4f}° E" if lat >= 0 else f"{abs(lat):.4f}° S / {lon:.4f}° E"
+            if lon < 0:
+                coords = coords.replace("E", "W")
+            
+            ax.text(0.5, coords_y, coords, transform=ax.transAxes,
+                    color=THEME['text'], alpha=0.7, ha='center', fontproperties=font_coords, zorder=11)
+            
+            # Decorative line position and length scale with poster width
+            line_y = 0.125 if country.strip() else 0.105
+            line_half = 0.1 * scale_factor
+            line_half = max(0.07, min(line_half, 0.2))
+            ax.plot([0.5 - line_half, 0.5 + line_half], [line_y, line_y], transform=ax.transAxes,
+                    color=THEME['text'], linewidth=1, zorder=11)
 
         # --- ATTRIBUTION (bottom right) ---
         # Removed OpenStreetMap attribution as requested
@@ -517,15 +766,47 @@ def create_poster(city, country, point, dist, output_file, output_format, bounda
 
     # 5. Save
     print(f"Saving to {output_file}...")
+    report("render_save", "Menyimpan hasil poster...")
 
     fmt = output_format.lower()
-    save_kwargs = dict(facecolor=THEME["bg"], bbox_inches="tight", pad_inches=0.05,)
+    # Expand bounds to match canvas aspect without distorting geometry
+    try:
+        x0, x1 = ax.get_xlim()
+        y0, y1 = ax.get_ylim()
+        x_range = x1 - x0
+        y_range = y1 - y0
+        if x_range > 0 and y_range > 0:
+            data_aspect = x_range / y_range
+            target_aspect = width_inches / height_inches
+            if data_aspect < target_aspect:
+                new_x_range = y_range * target_aspect
+                pad = (new_x_range - x_range) / 2
+                ax.set_xlim(x0 - pad, x1 + pad)
+            elif data_aspect > target_aspect:
+                new_y_range = x_range / target_aspect
+                pad = (new_y_range - y_range) / 2
+                ax.set_ylim(y0 - pad, y1 + pad)
+    except Exception:
+        pass
 
-    # DPI matters mainly for raster formats
+    save_face = 'none' if transparent_bg else THEME["bg"]
+    save_kwargs = dict(facecolor=save_face, pad_inches=0)
+
+    # Use same DPI as figure for consistent output
     if fmt == "png":
-        save_kwargs["dpi"] = 300
+        save_kwargs["dpi"] = render_dpi
+        if quality == "lossless":
+            # Use PIL kwargs when available (matplotlib compatibility varies)
+            save_kwargs["pil_kwargs"] = {"compress_level": 0}
+        if transparent_bg:
+            save_kwargs["transparent"] = True
 
-    plt.savefig(output_file, format=fmt, **save_kwargs)
+    try:
+        plt.savefig(output_file, format=fmt, **save_kwargs)
+    except TypeError:
+        # Fallback for older matplotlib that doesn't support pil_kwargs
+        save_kwargs.pop("pil_kwargs", None)
+        plt.savefig(output_file, format=fmt, **save_kwargs)
 
     plt.close()
     print(f"✓ Done! Poster saved as {output_file}")
@@ -578,13 +859,20 @@ Options:
   --distance, -d    Map radius in meters (default: 29000)
   --list-themes     List all available themes
 
-Distance guide:
-  4000-6000m   Small/dense cities (Venice, Amsterdam old center)
-  8000-12000m  Medium cities, focused downtown (Paris, Barcelona)
-  15000-20000m Large metros, full city view (Tokyo, Mumbai)
-
 Available themes can be found in the 'themes/' directory.
 Generated posters are saved to 'posters/' directory.
+
+Target Resolution (px) -> Inches (-W / -H):
+  Instagram Post     1080 x 1080  -> 3.6 x 3.6
+  Mobile Wallpaper   1080 x 1920  -> 3.6 x 6.4
+  HD Wallpaper       1920 x 1080  -> 6.4 x 3.6
+  4K Wallpaper       3840 x 2160  -> 12.8 x 7.2
+  A4 Print           2480 x 3508  -> 8.3 x 11.7
+
+Distance guide:
+  4000-6000m   Small/dense cities (Venice, Amsterdam center)
+  8000-12000m  Medium cities, focused downtown (Paris, Barcelona)
+  15000-20000m Large metros, full city view (Tokyo, Mumbai)
 """)
 
 def list_themes():
@@ -632,6 +920,7 @@ Contoh:
     parser.add_argument('--skala', '-s', type=int, default=29000, help='Skala peta dalam meter (default: 29000)')
     parser.add_argument('--daftar-tema', action='store_true', help='Daftar semua tema yang tersedia')
     parser.add_argument('--format', '-f', default='png', choices=['png', 'svg', 'pdf'],help='Format output untuk poster (default: png)')
+    parser.add_argument('--all-themes', action='store_true', help='Generate posters untuk semua tema yang tersedia')
     parser.add_argument('--kecamatan', type=str, help='Nama kecamatan untuk peta berbasis batas (contoh: "Menteng, Jakarta Pusat, Indonesia")')
     parser.add_argument('--width', type=float, default=30.48, help='Lebar poster dalam cm (default: 30.48 cm, sama dengan 12 inci)')
     parser.add_argument('--height', type=float, default=40.64, help='Tinggi poster dalam cm (default: 40.64 cm, sama dengan 16 inci)')
@@ -655,9 +944,9 @@ Contoh:
         print_examples()
         os.sys.exit(1)
     
-    # Validate theme exists
+    # Validate theme exists (unless all-themes)
     available_themes = get_available_themes()
-    if args.tema not in available_themes:
+    if not args.all_themes and args.tema not in available_themes:
         print(f"Error: Tema '{args.tema}' tidak ditemukan.")
         print(f"Tema yang tersedia: {', '.join(available_themes)}")
         os.sys.exit(1)
@@ -666,8 +955,8 @@ Contoh:
     print("Generator Poster Peta Kota")
     print("=" * 50)
     
-    # Load theme
-    THEME = load_theme(args.tema)
+    # Load theme(s)
+    theme_list = available_themes if args.all_themes else [args.tema]
     
     # Get coordinates and generate poster
     try:
@@ -683,13 +972,14 @@ Contoh:
         else:
             location_name = f"{args.kota}, {args.negara}"
             coords = get_coordinates(args.kota, args.negara)
-        
-        output_file = generate_output_filename(location_name.replace(',', '').replace(' ', '_'), args.tema, args.format)
-        
-        if boundary:
-            create_poster(location_name, "", None, None, output_file, args.format, boundary=boundary, width_cm=args.width, height_cm=args.height, clean=args.bersih)
-        else:
-            create_poster(args.kota, args.negara, coords, args.skala, output_file, args.format, width_cm=args.width, height_cm=args.height, clean=args.bersih)
+
+        for theme_name in theme_list:
+            THEME = load_theme(theme_name)
+            output_file = generate_output_filename(location_name.replace(',', '').replace(' ', '_'), theme_name, args.format)
+            if boundary is not None and not boundary.empty:
+                create_poster(location_name, "", None, None, output_file, args.format, boundary=boundary, width_cm=args.width, height_cm=args.height, clean=args.bersih)
+            else:
+                create_poster(args.kota, args.negara, coords, args.skala, output_file, args.format, width_cm=args.width, height_cm=args.height, clean=args.bersih)
         
         print("\n" + "=" * 50)
         print("✓ Pembuatan poster selesai!")

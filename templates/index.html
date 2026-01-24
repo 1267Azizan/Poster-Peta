@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Poster Peta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f7f7f7;
+            --card: #ffffff;
+            --text: #0c0c0c;
+            --muted: #5c5c5c;
+            --border: #0c0c0c;
+            --soft-border: #e3e3e3;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        body.theme-dark {
+            --bg: #0f1115;
+            --card: #161a22;
+            --text: #f2f3f5;
+            --muted: #b6bcc6;
+            --border: #f2f3f5;
+            --soft-border: #2a2f3a;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid var(--text);
+            color: var(--text);
+            background: transparent;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Space Grotesk", "Space Grotesk Fallback", sans-serif;
+            min-height: 100vh;
+            padding: 36px 20px 60px;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            text-align: left;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-section h1 {
+            font-size: clamp(2rem, 3vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .header-section p {
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 560px;
+        }
+
+        .header-note {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .header-note a {
+            color: var(--text);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid var(--text);
+        }
+
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            border: 2px solid var(--text);
+            color: var(--text);
+            background: transparent;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-menu {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            border: 2px solid var(--text);
+            background: transparent;
+            color: var(--text);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .main-card {
+            background: var(--card);
+            border-radius: 18px;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card-section {
+            padding: 36px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 28px;
+            margin-bottom: 28px;
+        }
+
+        .form-section {
+            border: 1px solid var(--soft-border);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .form-section h5 {
+            color: var(--text);
+            font-weight: 700;
+            margin-bottom: 18px;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.92rem;
+            letter-spacing: 0.01em;
+        }
+
+        .form-control,
+        .form-select {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--text);
+            box-shadow: 0 0 0 3px rgba(12, 12, 12, 0.12);
+            outline: none;
+        }
+
+        .size-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            gap: 14px;
+            align-items: end;
+        }
+
+        .preset-size-group {
+            display: none;
+            margin-bottom: 14px;
+        }
+
+        .preset-size-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .size-field .form-control,
+        .size-field .form-select {
+            height: 44px;
+        }
+
+        .size-field--unit {
+            width: 110px;
+            justify-self: center;
+        }
+
+        .form-text {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 6px;
+        }
+
+        .tooltip-table {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: help;
+        }
+
+        .tooltip-table .tooltip-content {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 320px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--soft-border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 12px;
+            z-index: 10;
+            display: none;
+        }
+
+        .tooltip-table:hover .tooltip-content {
+            display: block;
+        }
+
+        .tooltip-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .tooltip-table th,
+        .tooltip-table td {
+            text-align: left;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--soft-border);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--text);
+            border-color: var(--text);
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            color: var(--text);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .submit-section {
+            text-align: left;
+            margin-top: 26px;
+            padding-top: 26px;
+            border-top: 1px solid var(--soft-border);
+        }
+
+        .btn-submit {
+            background: var(--text);
+            color: var(--card);
+            border: 2px solid var(--text);
+            padding: 12px 36px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: transparent;
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner-border {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress Section */
+        .progress-section {
+            display: none;
+            margin-top: 26px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .progress-card {
+            background: var(--card);
+            border-radius: 14px;
+            border: 1px solid var(--soft-border);
+            overflow: hidden;
+        }
+
+        .progress-header {
+            background: var(--text);
+            color: var(--card);
+            padding: 16px 20px;
+        }
+
+        .progress-header h5 {
+            margin: 0;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-body {
+            padding: 22px;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 18px;
+        }
+
+        .progress-bar-custom {
+            height: 18px;
+            background-color: #ededed;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--text);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--card);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: #fafafa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border: 1px solid var(--soft-border);
+        }
+
+        .progress-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .progress-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-cancel {
+            margin-left: auto;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .cache-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 999px;
+            border: 1px solid var(--soft-border);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text);
+            background: #ffffff;
+            margin-left: 6px;
+        }
+
+        .cache-badge.active {
+            background: #22c55e;
+            color: #0b1f12;
+            border-color: #16a34a;
+        }
+
+        .history-section {
+            margin-top: 20px;
+            border: 1px solid var(--soft-border);
+            border-radius: 12px;
+            padding: 16px;
+            background: #ffffff;
+        }
+
+        .history-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--soft-border);
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .history-item small {
+            color: var(--muted);
+        }
+
+        .progress-spinner {
+            width: 26px;
+            height: 26px;
+            border: 3px solid #d6d6d6;
+            border-top-color: var(--text);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            flex-shrink: 0;
+        }
+
+        .progress-info h6 {
+            margin: 0 0 4px 0;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .progress-info small {
+            color: var(--muted);
+            display: block;
+        }
+
+        .render-detail {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed var(--soft-border);
+            background: #f8f8f8;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .render-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .render-detail-bar {
+            height: 10px;
+            background: #e6e6e6;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .render-detail-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1d1d1d, #5a5a5a);
+            transition: width 0.4s ease;
+        }
+
+        .render-detail-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px 12px;
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .render-detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 6px;
+            border-radius: 6px;
+        }
+
+        .render-detail-item.active {
+            background: #ffffff;
+            border: 1px solid var(--soft-border);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .render-detail-item.completed {
+            color: var(--text);
+            opacity: 0.8;
+        }
+
+        .download-detail {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed var(--soft-border);
+            background: #f8f8f8;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .download-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .download-detail-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px 12px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .download-detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--soft-border);
+            background: #ffffff;
+        }
+
+        .alert-box {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: none;
+            border: 1px solid var(--soft-border);
+            background: #f3f3f3;
+            color: var(--text);
+        }
+
+        .alert-box i {
+            margin-right: 10px;
+            font-weight: 700;
+        }
+
+        /* Result Section */
+        .result-section {
+            display: none;
+            text-align: left;
+            padding: 28px;
+            border-radius: 14px;
+            margin-top: 26px;
+            border: 1px solid var(--soft-border);
+            background: #fafafa;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .result-section h5 {
+            color: var(--text);
+            font-size: 1.35rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .result-section p {
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .preview-box {
+            border: 1px solid var(--soft-border);
+            border-radius: 12px;
+            padding: 12px;
+            background: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .preview-box img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--soft-border);
+        }
+
+        .preview-slider {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .preview-nav {
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .preview-index {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .preview-box iframe {
+            display: block;
+            width: 100%;
+            height: 520px;
+            border-radius: 8px;
+            border: 1px solid var(--soft-border);
+            background: #ffffff;
+        }
+
+        .preview-note {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        .btn-download {
+            background: var(--text);
+            color: var(--card);
+            border: 2px solid var(--text);
+            padding: 10px 26px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-download:hover {
+            background: transparent;
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .card-section {
+                padding: 24px;
+            }
+
+            .size-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .size-field--unit {
+                width: 100%;
+                justify-self: stretch;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn-submit,
+            .btn-download {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .result {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1>Generator Poster Peta</h1>
+            <p>Rancang poster peta minimalis untuk kota mana saja di dunia.</p>
+            <p class="header-note">Hubungi atmin untuk di antemi kalo ada masalah: <a href="https://wa.me/6281229933677" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <a class="btn-home" href="/">🏠 Home</a>
+                <button class="theme-toggle" id="themeToggle" type="button">🌙 Gelap</button>
+                <button class="btn-menu" id="menuToggle" type="button">☰</button>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <div class="card-section">
+                <form id="posterForm">
+                    <div class="form-grid">
+                        <!-- Lokasi Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-map-marker-alt"></i> Lokasi</h5>
+                            
+                            <div class="form-group">
+                                <label for="kota" class="form-label">Kota</label>
+                                <input type="text" class="form-control" id="kota" placeholder="Contoh: Jakarta">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="negara" class="form-label">Negara</label>
+                                <input type="text" class="form-control" id="negara" placeholder="Contoh: Indonesia">
+                                <div class="form-text">Bisa isi negara saja untuk membuat poster skala negara</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="kecamatan" class="form-label">Atau Kecamatan (Opsional)</label>
+                                <input type="text" class="form-control" id="kecamatan" placeholder="Contoh: Menteng, Jakarta Pusat">
+                                <div class="form-text">Jika diisi, kota dan negara akan diabaikan</div>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use_coordinates">
+                                <label class="form-check-label" for="use_coordinates">
+                                    Gunakan Koordinat Manual
+                                </label>
+                                <small class="form-text text-muted">Lewati pencarian lokasi, isi lat/lon langsung</small>
+                            </div>
+
+                            <div id="coordinate_section" style="display: none; margin-top: 12px;">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="latitude" class="form-label">Latitude</label>
+                                        <input type="number" step="0.000001" class="form-control" id="latitude" placeholder="-6.200000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="longitude" class="form-label">Longitude</label>
+                                        <input type="number" step="0.000001" class="form-control" id="longitude" placeholder="106.816666">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="custom_city" class="form-label">Teks Kota (Opsional)</label>
+                                        <input type="text" class="form-control" id="custom_city" placeholder="Contoh: Banten">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="custom_country" class="form-label">Teks Negara (Opsional)</label>
+                                        <input type="text" class="form-control" id="custom_country" placeholder="Contoh: Indonesia">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pengaturan Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-palette"></i> Pengaturan</h5>
+                            
+                            <div class="form-group">
+                                <label for="tema" class="form-label">Tema</label>
+                                <select class="form-select" id="tema">
+                                    <!-- Themes will be loaded dynamically -->
+                                </select>
+                            </div>
+                            
+                            <!-- Custom Theme Section -->
+                            <div id="custom_theme_section" style="display: none; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                                <h6><i class="fas fa-edit"></i> Kustomisasi Tema</h6>
+                                <small class="form-text text-muted" style="display: block; margin-bottom: 10px;">Pilih warna untuk setiap elemen peta</small>
+                                
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Latar Belakang</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_bg" value="#FFFFFF" title="Warna latar belakang">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Teks</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_text" value="#000000" title="Warna teks">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Air</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_water" value="#C0C0C0" title="Warna air">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Taman</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_parks" value="#F0F0F0" title="Warna taman">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Jalan Utama</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_road_primary" value="#1A1A1A" title="Warna jalan utama">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Jalan Sekunder</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_road_secondary" value="#2A2A2A" title="Warna jalan sekunder">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Jalan Tersier</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_road_tertiary" value="#3A3A3A" title="Warna jalan tersier">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" style="font-size: 0.85rem;">Garis Delineasi</label>
+                                        <input type="color" class="form-control form-control-color" id="custom_boundary" value="#333333" title="Warna garis batas">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-2">
+                                    <small class="form-text text-muted">
+                                        <a href="#" onclick="toggleAdvancedTheme(event)">Mode Lanjutan (JSON)</a>
+                                    </small>
+                                </div>
+                                <div id="advanced_theme_section" style="display: none; margin-top: 10px;">
+                                    <label class="form-label" style="font-size: 0.85rem;">Custom Theme JSON</label>
+                                    <textarea class="form-control" id="custom_theme_json" rows="6" placeholder='{"name": "Custom", "bg": "#FFFFFF", ...}'></textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="skala" class="form-label">
+                                    Skala Peta (meter)
+                                    <span class="tooltip-table">ⓘ
+                                        <span class="tooltip-content">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Distance</th>
+                                                        <th>Best for</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>4000-6000m</td>
+                                                        <td>Small/dense cities (Venice, Amsterdam center)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>8000-12000m</td>
+                                                        <td>Medium cities, focused downtown (Paris, Barcelona)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>15000-20000m</td>
+                                                        <td>Large metros, full city view (Tokyo, Mumbai)</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </span>
+                                    </span>
+                                </label>
+                                <input type="number" class="form-control" id="skala" value="29000" min="1000" max="100000000">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="format" class="form-label">Format Output</label>
+                                <select class="form-select" id="format">
+                                    <option value="png">PNG</option>
+                                    <option value="svg">SVG</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                                <div class="form-text" id="formatInfo">PNG: raster, ukuran file mengikuti DPI/kualitas.</div>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="transparent_bg">
+                                <label class="form-check-label" for="transparent_bg">
+                                    Background transparan (PNG/SVG)
+                                </label>
+                                <small class="form-text text-muted">PDF biasanya tidak mendukung transparansi</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="quality" class="form-label">Kualitas Output</label>
+                                <select class="form-select" id="quality">
+                                    <option value="low">Preview Cepat (150 DPI)</option>
+                                    <option value="medium" selected>Sedang</option>
+                                    <option value="high">Tinggi (Print)</option>
+                                    <option value="ultra">Sangat HD</option>
+                                    <option value="lossless">Lossless (tanpa kompres)</option>
+                                </select>
+                                <div class="form-text">Pilih kualitas output yang diinginkan</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Ukuran Poster Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-ruler-combined"></i> Ukuran Poster</h5>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use_preset_size">
+                                <label class="form-check-label" for="use_preset_size">
+                                    Gunakan preset ukuran (A6–A0)
+                                </label>
+                                <small class="form-text text-muted">Jika aktif, ukuran manual dinonaktifkan</small>
+                            </div>
+                            <div class="preset-size-group" id="presetSizeGroup">
+                                <div class="preset-size-grid">
+                                    <div>
+                                        <label for="preset_size" class="form-label">Preset Ukuran</label>
+                                        <select class="form-select" id="preset_size">
+                                            <option value="A6">A6 (10.5 × 14.8 cm)</option>
+                                            <option value="A5">A5 (14.8 × 21.0 cm)</option>
+                                            <option value="A4" selected>A4 (21.0 × 29.7 cm)</option>
+                                            <option value="A3">A3 (29.7 × 42.0 cm)</option>
+                                            <option value="A2">A2 (42.0 × 59.4 cm)</option>
+                                            <option value="A1">A1 (59.4 × 84.1 cm)</option>
+                                            <option value="A0">A0 (84.1 × 118.9 cm)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="preset_orientation" class="form-label">Orientasi</label>
+                                        <select class="form-select" id="preset_orientation">
+                                            <option value="portrait" selected>Portrait</option>
+                                            <option value="landscape">Landscape</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-check" style="margin-top: 10px;">
+                                <input class="form-check-input" type="checkbox" id="use_resolution_preset">
+                                <label class="form-check-label" for="use_resolution_preset">
+                                    Gunakan preset resolusi (px)
+                                </label>
+                                <small class="form-text text-muted">Instagram, Mobile, HD, 4K, A4 (px)</small>
+                            </div>
+                            <div class="preset-size-group" id="resolutionPresetGroup">
+                                <div class="preset-size-grid">
+                                    <div>
+                                        <label for="resolution_preset" class="form-label">Preset Resolusi</label>
+                                        <select class="form-select" id="resolution_preset">
+                                            <option value="ig">Instagram Post (1080 × 1080)</option>
+                                            <option value="mobile">Mobile Wallpaper (1080 × 1920)</option>
+                                            <option value="hd">HD Wallpaper (1920 × 1080)</option>
+                                            <option value="4k">4K Wallpaper (3840 × 2160)</option>
+                                            <option value="a4px">A4 Print (2480 × 3508)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Inches (-W / -H)</label>
+                                        <input type="text" class="form-control" id="resolution_inches" value="3.6 × 3.6" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="size-grid">
+                                <div class="size-field">
+                                    <label for="width" class="form-label">Lebar</label>
+                                    <input type="number" class="form-control" id="width" value="30.48" step="0.01" min="10" max="200">
+                                </div>
+                                <div class="size-field size-field--unit">
+                                    <label for="unit" class="form-label">Unit</label>
+                                    <select class="form-select" id="unit">
+                                        <option value="cm">cm</option>
+                                        <option value="mm">mm</option>
+                                        <option value="px">px</option>
+                                    </select>
+                                </div>
+                                <div class="size-field">
+                                    <label for="height" class="form-label">Tinggi (cm)</label>
+                                    <input type="number" class="form-control" id="height" value="40.64" step="0.01" min="10" max="300">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opsi Tambahan Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-sliders-h"></i> Opsi Tambahan</h5>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use_delineation">
+                                <label class="form-check-label" for="use_delineation">
+                                    Gunakan Delineasi (batas wilayah)
+                                </label>
+                                <small class="form-text text-muted">Jika dicentang, peta akan dibatasi oleh batas wilayah kota/kecamatan.</small>
+                            </div>
+                            
+                            <div class="form-check" id="boundary_edge_group" style="display: none; margin-left: 1.5rem;">
+                                <input class="form-check-input" type="checkbox" id="show_boundary_edge" checked>
+                                <label class="form-check-label" for="show_boundary_edge">
+                                    Tampilkan Garis Tepi Delineasi
+                                </label>
+                                <small class="form-text text-muted">Jika dicentang, menampilkan garis batas wilayah di peta.</small>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="clean">
+                                <label class="form-check-label" for="clean">
+                                    Poster Bersih (tanpa teks)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="all_themes">
+                                <label class="form-check-label" for="all_themes">
+                                    Generate Semua Tema
+                                </label>
+                                <small class="form-text text-muted">Akan membuat satu file per tema (lebih lama)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="submit-section">
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <span class="spinner-border loading-spinner" style="width: 20px; height: 20px; border-width: 2px; display: none;" role="status" aria-hidden="true"></span>
+                            <span class="loading">Memproses...</span>
+                            <span class="submit-text">🖼️ Buat Poster</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <h5 id="progressTitle">
+                                <i class="fas fa-cog fa-spin"></i>
+                                Memproses Poster...
+                            </h5>
+                        </div>
+                        
+                        <div class="progress-body">
+                            <!-- Progress Bar -->
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-custom">
+                                    <div class="progress-bar-fill" id="progressBar" style="width: 0%">
+                                        <span id="progressPercent">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Step Info -->
+                            <div class="progress-step">
+                                <div class="progress-spinner"></div>
+                                <div class="progress-info">
+                                    <h6 id="progressStep">Memulai...</h6>
+                                    <small id="progressMessage">Menyiapkan pembuatan poster</small>
+                                </div>
+                            </div>
+                            <div class="progress-meta">
+                                <span id="elapsedTime">Elapsed: 0s</span>
+                                <span id="etaTime">ETA: --</span>
+                                <button class="btn-cancel" id="cancelBtn" type="button">Hentikan</button>
+                            </div>
+
+                            <!-- Rendering Detail -->
+                            <div class="render-detail" id="renderDetail">
+                                <div class="render-detail-header">
+                                    <span>Rincian Rendering</span>
+                                    <span id="renderDetailPercent">0%</span>
+                                </div>
+                                <div class="render-detail-bar">
+                                    <div class="render-detail-fill" id="renderDetailFill" style="width: 0%"></div>
+                                </div>
+                                <div class="render-detail-list" id="renderDetailList">
+                                    <div class="render-detail-item" data-step="render_setup" data-percent="10">
+                                        <span>Menyiapkan kanvas</span><span>10%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_layers_water" data-percent="25">
+                                        <span>Layer air</span><span>25%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_layers_parks" data-percent="40">
+                                        <span>Layer hijau</span><span>40%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_boundary" data-percent="55">
+                                        <span>Garis batas</span><span>55%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_roads" data-percent="75">
+                                        <span>Jaringan jalan</span><span>75%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_gradients" data-percent="85">
+                                        <span>Gradient</span><span>85%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_text" data-percent="95">
+                                        <span>Tipografi</span><span>95%</span>
+                                    </div>
+                                    <div class="render-detail-item" data-step="render_save" data-percent="100">
+                                        <span>Menyimpan</span><span>100%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Download Detail -->
+                            <div class="download-detail" id="downloadDetail">
+                                <div class="download-detail-header">
+                                    <span>Rincian Unduhan</span>
+                                    <span id="downloadDetailPercent">0%</span>
+                                </div>
+                                <div class="download-detail-list">
+                                    <div class="download-detail-item">
+                                        <span>Jaringan jalan <span class="cache-badge" id="cacheStreets" style="display: none;">CACHE</span></span><span id="downloadStreets">0%</span>
+                                    </div>
+                                    <div class="download-detail-item">
+                                        <span>Fitur air <span class="cache-badge" id="cacheWater" style="display: none;">CACHE</span></span><span id="downloadWater">0%</span>
+                                    </div>
+                                    <div class="download-detail-item">
+                                        <span>Ruang hijau <span class="cache-badge" id="cacheParks" style="display: none;">CACHE</span></span><span id="downloadParks">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Alert -->
+                            <div class="alert-box alert-info" id="progressAlert">
+                                <i class="fas fa-info-circle"></i>
+                                <span id="progressAlertText"></span>
+                            </div>
+
+                            <!-- Performance Tip -->
+                            <div class="alert-box alert-warning" id="performanceTip">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Tip:</strong> <span id="performanceTipText"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Section -->
+                <div class="result-section result">
+                    <h5>✅ Poster Berhasil Dibuat!</h5>
+                    <p>Unduh file poster Anda sekarang</p>
+                    <div class="preview-box" id="previewBox" style="display: none;">
+                    <div class="preview-slider" id="previewSlider">
+                        <button class="preview-nav" id="previewPrev" type="button">Prev</button>
+                        <div class="preview-index" id="previewIndex">1 / 1</div>
+                        <button class="preview-nav" id="previewNext" type="button">Next</button>
+                    </div>
+                        <img id="previewImage" alt="Preview poster">
+                        <iframe id="previewPdf" title="Preview PDF" style="display: none;"></iframe>
+                        <div class="preview-note" id="previewNote"></div>
+                        <div class="preview-note" id="previewTimeNote"></div>
+                    </div>
+                    <div class="history-list" id="downloadList" style="display: none; margin-bottom: 12px;"></div>
+                    <a href="#" class="btn-download" id="downloadAllBtn" style="display: none;" download>
+                        Unduh Semua (ZIP)
+                    </a>
+                    <a href="#" class="btn-download" id="downloadBtn" download>
+                        📥 Unduh Poster
+                    </a>
+                </div>
+
+                <!-- History Section -->
+                <div class="history-section" id="historySection" style="display: none;">
+                    <div class="history-title">Riwayat Hasil Terakhir</div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentTaskId = null;
+        let currentStartTime = null;
+        let lastElapsedSeconds = 0;
+        let cacheBlinkTimer = null;
+        let cacheBlinkIndex = 0;
+
+        // Load themes on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/themes')
+                .then(response => response.json())
+                .then(data => {
+                    const themeSelect = document.getElementById('tema');
+                    data.themes.forEach(theme => {
+                        const option = document.createElement('option');
+                        option.value = theme;
+                        option.textContent = theme.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        if (theme === 'feature_based') {
+                            option.selected = true;
+                        }
+                        themeSelect.appendChild(option);
+                    });
+                    
+                    // Add custom theme option
+                    const customOption = document.createElement('option');
+                    customOption.value = 'custom';
+                    customOption.textContent = '+ Tema Kustom';
+                    customOption.style.fontWeight = 'bold';
+                    customOption.style.color = '#0c0c0c';
+                    themeSelect.appendChild(customOption);
+                })
+                .catch(error => console.error('Error loading themes:', error));
+            
+            // Handle theme selection change
+            document.getElementById('tema').addEventListener('change', function() {
+                const customSection = document.getElementById('custom_theme_section');
+                if (this.value === 'custom') {
+                    customSection.style.display = 'block';
+                } else {
+                    customSection.style.display = 'none';
+                }
+            });
+        });
+        
+        function toggleAdvancedTheme(e) {
+            e.preventDefault();
+            const advancedSection = document.getElementById('advanced_theme_section');
+            advancedSection.style.display = advancedSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Handle form submission
+        document.getElementById('posterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.querySelector('.submit-text');
+            const loadingSpinner = document.querySelector('.loading');
+            const spinnerIcon = document.querySelector('.loading-spinner');
+            const resultDiv = document.querySelector('.result-section');
+            const progressSection = document.querySelector('.progress-section');
+            const progressBar = document.getElementById('progressBar');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const renderDetail = document.getElementById('renderDetail');
+            const renderDetailFill = document.getElementById('renderDetailFill');
+            const renderDetailPercent = document.getElementById('renderDetailPercent');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const elapsedTime = document.getElementById('elapsedTime');
+            const etaTime = document.getElementById('etaTime');
+            const downloadDetail = document.getElementById('downloadDetail');
+            const downloadDetailPercent = document.getElementById('downloadDetailPercent');
+            const downloadStreets = document.getElementById('downloadStreets');
+            const downloadWater = document.getElementById('downloadWater');
+            const downloadParks = document.getElementById('downloadParks');
+            const qualityValue = document.getElementById('quality').value;
+            const qualityMap = {
+                low: 100,
+                medium: 150,
+                high: 300,
+                ultra: 600,
+                lossless: 600
+            };
+            const dpiValue = qualityMap[qualityValue] || 150;
+
+            // Show loading state
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'inline-block';
+            spinnerIcon.style.display = 'inline-block';
+            submitText.style.display = 'none';
+            resultDiv.style.display = 'none';
+            progressSection.style.display = 'block';
+            renderDetail.style.display = 'none';
+            renderDetailFill.style.width = '0%';
+            renderDetailPercent.textContent = '0%';
+            elapsedTime.textContent = 'Elapsed: 0s';
+            etaTime.textContent = 'ETA: --';
+            cancelBtn.disabled = true;
+            cancelBtn.textContent = 'Hentikan';
+
+            // Scroll to progress section
+            progressSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Collect form data
+            const formData = {
+                kota: document.getElementById('kota').value.trim(),
+                negara: document.getElementById('negara').value.trim(),
+                kecamatan: document.getElementById('kecamatan').value.trim(),
+                use_coordinates: document.getElementById('use_coordinates').checked,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value),
+                custom_city: document.getElementById('custom_city').value.trim(),
+                custom_country: document.getElementById('custom_country').value.trim(),
+                tema: document.getElementById('tema').value,
+                skala: parseInt(document.getElementById('skala').value),
+                format: document.getElementById('format').value,
+                transparent_bg: document.getElementById('transparent_bg').checked,
+                quality: qualityValue,
+                dpi: dpiValue,
+                width: parseFloat(document.getElementById('width').value),
+                height: parseFloat(document.getElementById('height').value),
+                unit: document.getElementById('unit').value,
+                use_delineation: document.getElementById('use_delineation').checked,
+                show_boundary_edge: document.getElementById('show_boundary_edge').checked,
+                clean: document.getElementById('clean').checked,
+                all_themes: document.getElementById('all_themes').checked
+            };
+            
+            // Handle custom theme
+            if (formData.tema === 'custom') {
+                const customThemeJson = document.getElementById('custom_theme_json').value.trim();
+                if (customThemeJson) {
+                    // User provided JSON
+                    try {
+                        formData.custom_theme = JSON.parse(customThemeJson);
+                    } catch (e) {
+                        alert('Error: Invalid JSON di custom theme. ' + e.message);
+                        resetForm();
+                        return;
+                    }
+                } else {
+                    // Create from color inputs
+                    formData.custom_theme = {
+                        name: 'Custom Theme',
+                        description: 'Custom theme created via web interface',
+                        bg: document.getElementById('custom_bg').value,
+                        text: document.getElementById('custom_text').value,
+                        gradient_color: document.getElementById('custom_bg').value,
+                        water: document.getElementById('custom_water').value,
+                        parks: document.getElementById('custom_parks').value,
+                        boundary: document.getElementById('custom_boundary').value,
+                        road_motorway: document.getElementById('custom_road_primary').value,
+                        road_primary: document.getElementById('custom_road_primary').value,
+                        road_secondary: document.getElementById('custom_road_secondary').value,
+                        road_tertiary: document.getElementById('custom_road_tertiary').value,
+                        road_residential: document.getElementById('custom_road_tertiary').value,
+                        road_default: document.getElementById('custom_road_secondary').value
+                    };
+                }
+            }
+
+            // Validate required fields
+            if (formData.use_coordinates) {
+                if (Number.isNaN(formData.latitude) || Number.isNaN(formData.longitude)) {
+                    alert('Harap isi latitude dan longitude yang valid.');
+                    resetForm();
+                    return;
+                }
+            } else {
+                if (formData.kecamatan) {
+                    if (!formData.kota || !formData.negara) {
+                        alert('Untuk kecamatan, harap isi kota dan negara.');
+                        resetForm();
+                        return;
+                    }
+                }
+                if (formData.kota && !formData.negara) {
+                    alert('Untuk level kota, negara wajib diisi.');
+                    resetForm();
+                    return;
+                }
+                if (!formData.kota && formData.negara && !formData.kecamatan) {
+                    const proceed = confirm('Anda memilih level negara. Proses ini berat dan memakan waktu. Lanjutkan?');
+                    if (!proceed) {
+                        resetForm();
+                        return;
+                    }
+                }
+                if (!formData.kecamatan && !formData.negara) {
+                    alert('Harap isi kecamatan, atau kota + negara, atau negara saja.');
+                    resetForm();
+                    return;
+                }
+            }
+
+            // Send request to create poster
+            fetch('/api/create_poster', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                const taskId = data.task_id;
+                currentTaskId = taskId;
+                currentStartTime = Date.now();
+                cancelBtn.disabled = false;
+                cancelBtn.onclick = () => {
+                    fetch(`/api/cancel/${taskId}`, { method: 'POST' })
+                        .then(() => {
+                            cancelBtn.disabled = true;
+                            cancelBtn.textContent = 'Menghentikan...';
+                        })
+                        .catch(() => {
+                            cancelBtn.disabled = false;
+                        });
+                };
+
+                // Poll for progress
+                const progressInterval = setInterval(() => {
+                    fetch(`/api/progress/${taskId}`)
+                    .then(response => response.json())
+                    .then(progress => {
+                        if (progress.status === 'not_found') {
+                            clearInterval(progressInterval);
+                            throw new Error('Task not found');
+                        }
+
+                        const progressBar = document.getElementById('progressBar');
+                        const progressPercent = document.getElementById('progressPercent');
+                        const progressStep = document.getElementById('progressStep');
+                        const progressMessage = document.getElementById('progressMessage');
+                        const progressTitle = document.getElementById('progressTitle');
+                        const progressAlert = document.getElementById('progressAlert');
+                        const progressAlertText = document.getElementById('progressAlertText');
+                        const performanceTip = document.getElementById('performanceTip');
+                        const performanceTipText = document.getElementById('performanceTipText');
+                        const renderDetail = document.getElementById('renderDetail');
+                        const renderDetailFill = document.getElementById('renderDetailFill');
+                        const renderDetailPercent = document.getElementById('renderDetailPercent');
+                        const renderDetailItems = Array.from(document.querySelectorAll('.render-detail-item'));
+                        const downloadDetail = document.getElementById('downloadDetail');
+                        const downloadDetailPercent = document.getElementById('downloadDetailPercent');
+                        const downloadStreets = document.getElementById('downloadStreets');
+                        const downloadWater = document.getElementById('downloadWater');
+                        const downloadParks = document.getElementById('downloadParks');
+                        const cacheStreets = document.getElementById('cacheStreets');
+                        const cacheWater = document.getElementById('cacheWater');
+                        const cacheParks = document.getElementById('cacheParks');
+                        const elapsedTime = document.getElementById('elapsedTime');
+                        const etaTime = document.getElementById('etaTime');
+                        const renderOrder = renderDetailItems.map(item => item.dataset.step);
+                        const renderPercentMap = {};
+                        renderDetailItems.forEach(item => {
+                            renderPercentMap[item.dataset.step] = parseInt(item.dataset.percent, 10);
+                        });
+
+                        progressMessage.textContent = progress.message;
+
+                        // Update progress bar and UI based on status
+                        let percent = 0;
+                        let step = '';
+                        let title = '';
+                        let showAlert = false;
+                        let alertText = '';
+                        let showTip = false;
+                        let tipText = '';
+
+                        switch(progress.status) {
+                            case 'starting':
+                                percent = 5;
+                                step = 'Memulai';
+                                title = '<i class="fas fa-rocket"></i> Memulai Pembuatan Poster...';
+                                break;
+                            case 'validating':
+                                percent = 10;
+                                step = 'Validasi Input';
+                                title = '<i class="fas fa-check-circle"></i> Memvalidasi Data...';
+                                showAlert = true;
+                                alertText = 'Memeriksa tema, lokasi, dan pengaturan lainnya';
+                                break;
+                            case 'loading_theme':
+                                percent = 15;
+                                step = 'Memuat Tema';
+                                title = '<i class="fas fa-palette"></i> Memuat Tema Poster...';
+                                showAlert = true;
+                                alertText = `Mengaktifkan tema: ${formData.tema.replace(/_/g, ' ')}`;
+                                break;
+                            case 'fetching_data':
+                                percent = 20;
+                                step = 'Menyiapkan Data';
+                                title = '<i class="fas fa-cloud-download-alt"></i> Menyiapkan Data Peta...';
+                                showAlert = true;
+                                alertText = 'Memulai unduhan data peta';
+                                break;
+                            case 'fetching_streets':
+                                percent = 35;
+                                step = 'Mengunduh Jalan';
+                                title = '<i class="fas fa-road"></i> Mengunduh Data Jalan...';
+                                showAlert = true;
+                                alertText = 'Mengambil jaringan jalan dari OpenStreetMap';
+                                break;
+                            case 'fetching_water':
+                                percent = 45;
+                                step = 'Mengunduh Air';
+                                title = '<i class="fas fa-water"></i> Mengunduh Fitur Air...';
+                                showAlert = true;
+                                alertText = 'Mengambil sungai, danau, dan fitur air lainnya';
+                                break;
+                            case 'fetching_parks':
+                                percent = 55;
+                                step = 'Mengunduh Taman';
+                                title = '<i class="fas fa-tree"></i> Mengunduh Ruang Hijau...';
+                                showAlert = true;
+                                alertText = 'Mengambil taman, kebun, dan area hijau';
+                                break;
+                            case 'fetching_boundary':
+                                percent = 25;
+                                step = 'Mengambil Batas';
+                                title = '<i class="fas fa-draw-polygon"></i> Mengambil Data Batas...';
+                                showAlert = true;
+                                alertText = `Mengambil batas wilayah untuk ${formData.kecamatan || formData.kota || formData.negara}`;
+                                showTip = true;
+                                tipText = 'Data batas wilayah di-cache untuk akses selanjutnya';
+                                break;
+                            case 'geocoding':
+                                percent = 25;
+                                step = 'Mencari Lokasi';
+                                title = '<i class="fas fa-map-marker-alt"></i> Mencari Koordinat...';
+                                showAlert = true;
+                                alertText = `Mencari koordinat untuk ${formData.kota || ''} ${formData.negara || ''}`.trim();
+                                break;
+                            case 'generating':
+                                percent = 85;
+                                step = 'Rendering Poster';
+                                title = '<i class="fas fa-magic"></i> Rendering Poster Peta...';
+                                showAlert = true;
+                                alertText = 'Menggambar dan menyusun semua elemen peta';
+                                showTip = true;
+                                tipText = 'Tahap akhir - menggabungkan semua data menjadi poster final';
+                                break;
+                            case 'render_setup':
+                                percent = 60;
+                                step = 'Rendering: Kanvas';
+                                title = '<i class="fas fa-magic"></i> Rendering Poster Peta...';
+                                showAlert = true;
+                                alertText = 'Menyiapkan kanvas rendering';
+                                break;
+                            case 'render_layers_water':
+                                percent = 65;
+                                step = 'Rendering: Air';
+                                title = '<i class="fas fa-water"></i> Rendering Layer Air...';
+                                showAlert = true;
+                                alertText = 'Menggambar area air';
+                                break;
+                            case 'render_layers_parks':
+                                percent = 70;
+                                step = 'Rendering: Hijau';
+                                title = '<i class="fas fa-tree"></i> Rendering Ruang Hijau...';
+                                showAlert = true;
+                                alertText = 'Menggambar area taman dan ruang hijau';
+                                break;
+                            case 'render_boundary':
+                                percent = 75;
+                                step = 'Rendering: Batas';
+                                title = '<i class="fas fa-draw-polygon"></i> Rendering Garis Batas...';
+                                showAlert = true;
+                                alertText = 'Menggambar garis batas wilayah';
+                                break;
+                            case 'render_roads':
+                                percent = 85;
+                                step = 'Rendering: Jalan';
+                                title = '<i class="fas fa-road"></i> Rendering Jaringan Jalan...';
+                                showAlert = true;
+                                alertText = 'Menggambar jaringan jalan';
+                                break;
+                            case 'render_gradients':
+                                percent = 90;
+                                step = 'Rendering: Gradient';
+                                title = '<i class="fas fa-layer-group"></i> Rendering Gradient...';
+                                showAlert = true;
+                                alertText = 'Menambahkan efek gradient';
+                                break;
+                            case 'render_text':
+                                percent = 95;
+                                step = 'Rendering: Tipografi';
+                                title = '<i class="fas fa-font"></i> Rendering Tipografi...';
+                                showAlert = true;
+                                alertText = 'Menambahkan teks dan koordinat';
+                                break;
+                            case 'render_save':
+                                percent = 97;
+                                step = 'Menyimpan';
+                                title = '<i class="fas fa-save"></i> Menyimpan Poster...';
+                                showAlert = true;
+                                alertText = 'Menyimpan output poster';
+                                break;
+                            case 'completed':
+                                percent = 100;
+                                step = 'Selesai';
+                                title = '<i class="fas fa-check-double"></i> Poster Berhasil Dibuat!';
+                                progressBar.style.width = percent + '%';
+                                progressPercent.textContent = percent + '%';
+                                progressTitle.innerHTML = title;
+                                renderDetail.style.display = 'none';
+                                clearInterval(progressInterval);
+                                setTimeout(() => {
+                                    showResult(taskId, formData, progress.files || null);
+                                    // Hide loading spinner after poster is done
+                                    loadingSpinner.style.display = 'none';
+            spinnerIcon.style.display = 'none';
+                                    submitText.style.display = 'inline';
+                                    cancelBtn.disabled = true;
+                                    cancelBtn.textContent = 'Hentikan';
+                                }, 500);
+                                return;
+                            case 'error':
+                                clearInterval(progressInterval);
+                                progressTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error!';
+                                progressBar.style.background = '#0c0c0c';
+                                renderDetail.style.display = 'none';
+                                cancelBtn.disabled = true;
+                                cancelBtn.textContent = 'Hentikan';
+                                throw new Error(progress.message);
+                        }
+
+                        progressBar.style.width = percent + '%';
+                        progressPercent.textContent = percent + '%';
+                        progressStep.textContent = step;
+                        progressTitle.innerHTML = title;
+
+                        if (renderPercentMap[progress.status]) {
+                            const renderPercent = renderPercentMap[progress.status];
+                            const activeIndex = renderOrder.indexOf(progress.status);
+                            renderDetail.style.display = 'block';
+                            renderDetailFill.style.width = renderPercent + '%';
+                            renderDetailPercent.textContent = renderPercent + '%';
+                            renderDetailItems.forEach((item, idx) => {
+                                item.classList.remove('active', 'completed');
+                                if (idx < activeIndex) {
+                                    item.classList.add('completed');
+                                } else if (idx === activeIndex) {
+                                    item.classList.add('active');
+                                }
+                            });
+                        } else {
+                            renderDetail.style.display = 'none';
+                        }
+
+                        if (progress.details) {
+                            const streets = Math.max(0, Math.min(100, progress.details.fetching_streets || 0));
+                            const water = Math.max(0, Math.min(100, progress.details.fetching_water || 0));
+                            const parks = Math.max(0, Math.min(100, progress.details.fetching_parks || 0));
+                            const avg = Math.round((streets + water + parks) / 3);
+                            downloadDetail.style.display = 'block';
+                            downloadDetailPercent.textContent = `${avg}%`;
+                            downloadStreets.textContent = `${streets}%`;
+                            downloadWater.textContent = `${water}%`;
+                            downloadParks.textContent = `${parks}%`;
+                        } else {
+                            downloadDetail.style.display = 'none';
+                        }
+
+                        if (progress.cache_hits) {
+                            const hits = [];
+                            if (progress.cache_hits.streets) hits.push(cacheStreets);
+                            if (progress.cache_hits.water) hits.push(cacheWater);
+                            if (progress.cache_hits.parks) hits.push(cacheParks);
+
+                            cacheStreets.style.display = progress.cache_hits.streets ? 'inline-block' : 'none';
+                            cacheWater.style.display = progress.cache_hits.water ? 'inline-block' : 'none';
+                            cacheParks.style.display = progress.cache_hits.parks ? 'inline-block' : 'none';
+
+                            if (hits.length) {
+                                if (!cacheBlinkTimer) {
+                                    cacheBlinkIndex = 0;
+                                    cacheBlinkTimer = setInterval(() => {
+                                        hits.forEach(b => b.classList.remove('active'));
+                                        hits[cacheBlinkIndex % hits.length].classList.add('active');
+                                        cacheBlinkIndex += 1;
+                                    }, 3000);
+                                }
+                            } else if (cacheBlinkTimer) {
+                                clearInterval(cacheBlinkTimer);
+                                cacheBlinkTimer = null;
+                                [cacheStreets, cacheWater, cacheParks].forEach(b => b.classList.remove('active'));
+                            }
+                        }
+
+                        const elapsed = progress.elapsed_seconds || (currentStartTime ? (Date.now() - currentStartTime) / 1000 : 0);
+                        lastElapsedSeconds = elapsed;
+                        const elapsedLabel = elapsed < 60 ? `${Math.round(elapsed)}s` : `${Math.floor(elapsed / 60)}m ${Math.round(elapsed % 60)}s`;
+                        elapsedTime.textContent = `Elapsed: ${elapsedLabel}`;
+                        if (progress.eta_seconds) {
+                            const eta = progress.eta_seconds;
+                            const etaLabel = eta < 60 ? `${Math.round(eta)}s` : `${Math.floor(eta / 60)}m ${Math.round(eta % 60)}s`;
+                            etaTime.textContent = `ETA: ${etaLabel}`;
+                        } else {
+                            etaTime.textContent = 'ETA: --';
+                        }
+
+                        if (showAlert) {
+                            progressAlert.style.display = 'block';
+                            progressAlertText.textContent = alertText;
+                        } else {
+                            progressAlert.style.display = 'none';
+                        }
+
+                        if (showTip) {
+                            performanceTip.style.display = 'block';
+                            performanceTipText.textContent = tipText;
+                        } else {
+                            performanceTip.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        clearInterval(progressInterval);
+                        console.error('Progress check failed:', error);
+                    });
+                }, 1000); // Check every second
+
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+                resetForm();
+            });
+        });
+
+        function resetForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.querySelector('.submit-text');
+            const loadingSpinner = document.querySelector('.loading');
+            const progressSection = document.querySelector('.progress-section');
+            const resultDiv = document.querySelector('.result-section');
+            const renderDetail = document.getElementById('renderDetail');
+            const renderDetailFill = document.getElementById('renderDetailFill');
+            const renderDetailPercent = document.getElementById('renderDetailPercent');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const elapsedTime = document.getElementById('elapsedTime');
+            const etaTime = document.getElementById('etaTime');
+            const downloadDetail = document.getElementById('downloadDetail');
+            const downloadDetailPercent = document.getElementById('downloadDetailPercent');
+            const downloadStreets = document.getElementById('downloadStreets');
+            const downloadWater = document.getElementById('downloadWater');
+            const downloadParks = document.getElementById('downloadParks');
+            const previewBox = document.getElementById('previewBox');
+            const previewImage = document.getElementById('previewImage');
+            const previewPdf = document.getElementById('previewPdf');
+            const previewNote = document.getElementById('previewNote');
+            const previewTimeNote = document.getElementById('previewTimeNote');
+            const downloadList = document.getElementById('downloadList');
+
+            submitBtn.disabled = false;
+            submitText.style.display = 'inline';
+            loadingSpinner.style.display = 'none';
+            spinnerIcon.style.display = 'none';
+            progressSection.style.display = 'none';
+            resultDiv.style.display = 'none';
+            renderDetail.style.display = 'none';
+            renderDetailFill.style.width = '0%';
+            renderDetailPercent.textContent = '0%';
+            elapsedTime.textContent = 'Elapsed: 0s';
+            etaTime.textContent = 'ETA: --';
+            cancelBtn.disabled = true;
+            cancelBtn.textContent = 'Hentikan';
+            downloadDetail.style.display = 'none';
+            downloadDetailPercent.textContent = '0%';
+            downloadStreets.textContent = '0%';
+            downloadWater.textContent = '0%';
+            downloadParks.textContent = '0%';
+            document.getElementById('cacheStreets').style.display = 'none';
+            document.getElementById('cacheWater').style.display = 'none';
+            document.getElementById('cacheParks').style.display = 'none';
+            previewBox.style.display = 'none';
+            previewImage.removeAttribute('src');
+            previewImage.style.display = 'block';
+            previewPdf.removeAttribute('src');
+            previewPdf.style.display = 'none';
+            previewNote.textContent = '';
+            previewTimeNote.textContent = '';
+            downloadList.style.display = 'none';
+            downloadList.innerHTML = '';
+            const previewSlider = document.getElementById('previewSlider');
+            const previewPrev = document.getElementById('previewPrev');
+            const previewNext = document.getElementById('previewNext');
+            const previewIndex = document.getElementById('previewIndex');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            previewSlider.style.display = 'none';
+            previewPrev.onclick = null;
+            previewNext.onclick = null;
+            previewIndex.textContent = '1 / 1';
+            downloadAllBtn.style.display = 'none';
+            currentTaskId = null;
+            currentStartTime = null;
+            lastElapsedSeconds = 0;
+            if (cacheBlinkTimer) {
+                clearInterval(cacheBlinkTimer);
+                cacheBlinkTimer = null;
+            }
+        }
+
+        function showResult(taskId, formData, files) {
+            const resultDiv = document.querySelector('.result-section');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            const progressSection = document.querySelector('.progress-section');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.querySelector('.submit-text');
+            const loadingSpinner = document.querySelector('.loading');
+            const previewBox = document.getElementById('previewBox');
+            const previewSlider = document.getElementById('previewSlider');
+            const previewPrev = document.getElementById('previewPrev');
+            const previewNext = document.getElementById('previewNext');
+            const previewIndex = document.getElementById('previewIndex');
+            const previewImage = document.getElementById('previewImage');
+            const previewPdf = document.getElementById('previewPdf');
+            const previewNote = document.getElementById('previewNote');
+            const previewTimeNote = document.getElementById('previewTimeNote');
+            const downloadList = document.getElementById('downloadList');
+
+            progressSection.style.display = 'none';
+            resultDiv.style.display = 'block';
+            submitBtn.disabled = false;
+            submitText.style.display = 'inline';
+            loadingSpinner.style.display = 'none';
+
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Set download link
+            const dataParam = encodeURIComponent(JSON.stringify(formData));
+            downloadBtn.href = `/api/download/${taskId}?data=${dataParam}&no_compress=1`;
+            downloadAllBtn.style.display = 'none';
+
+            const format = (formData.format || 'png').toLowerCase();
+            if (format === 'png' || format === 'svg') {
+                previewBox.style.display = 'block';
+                previewNote.textContent = 'Preview (resolusi menyesuaikan output).';
+                previewImage.style.display = 'block';
+                previewImage.src = `/api/preview/${taskId}?t=${Date.now()}`;
+                previewPdf.style.display = 'none';
+                previewPdf.removeAttribute('src');
+            } else if (format === 'pdf') {
+                previewBox.style.display = 'block';
+                previewNote.textContent = 'Preview PDF (scroll untuk melihat halaman).';
+                previewImage.style.display = 'none';
+                previewImage.removeAttribute('src');
+                previewPdf.style.display = 'block';
+                previewPdf.src = `/api/preview/${taskId}?t=${Date.now()}`;
+            } else {
+                previewBox.style.display = 'block';
+                previewNote.textContent = 'Preview hanya tersedia untuk PNG/SVG/PDF. Silakan unduh untuk melihat hasil.';
+                previewImage.removeAttribute('src');
+                previewImage.style.display = 'none';
+                previewPdf.removeAttribute('src');
+                previewPdf.style.display = 'none';
+            }
+
+            if (formData.all_themes && (!files || files.length < 2)) {
+                fetch(`/api/progress/${taskId}`)
+                    .then(response => response.json())
+                    .then(progress => {
+                        if (progress.files && progress.files.length > 1) {
+                            showResult(taskId, formData, progress.files);
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            if (files && files.length > 1) {
+                let idx = 0;
+                const max = files.length;
+                previewSlider.style.display = 'flex';
+                previewIndex.textContent = `${idx + 1} / ${max}`;
+                if (format === 'png' || format === 'svg') {
+                    previewImage.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                } else if (format === 'pdf') {
+                    previewPdf.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                }
+                previewPrev.onclick = () => {
+                    idx = (idx - 1 + max) % max;
+                    previewIndex.textContent = `${idx + 1} / ${max}`;
+                    if (format === 'png' || format === 'svg') {
+                        previewImage.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                    } else if (format === 'pdf') {
+                        previewPdf.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                    }
+                };
+                previewNext.onclick = () => {
+                    idx = (idx + 1) % max;
+                    previewIndex.textContent = `${idx + 1} / ${max}`;
+                    if (format === 'png' || format === 'svg') {
+                        previewImage.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                    } else if (format === 'pdf') {
+                        previewPdf.src = `/api/preview/${taskId}?index=${idx}&t=${Date.now()}`;
+                    }
+                };
+
+                downloadList.style.display = 'grid';
+                downloadList.innerHTML = '';
+                files.forEach(file => {
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    const left = document.createElement('div');
+                    left.textContent = `Tema: ${file.theme || '-'}`;
+                    const right = document.createElement('a');
+                    right.className = 'btn-download';
+                    right.textContent = 'Unduh';
+                    right.href = `/api/download/${taskId}?index=${file.index}&data=${dataParam}&no_compress=1`;
+                    right.setAttribute('download', '');
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    downloadList.appendChild(row);
+                });
+                downloadAllBtn.style.display = 'inline-flex';
+                downloadAllBtn.href = `/api/download_all/${taskId}?data=${dataParam}`;
+            } else {
+                downloadList.style.display = 'none';
+                downloadList.innerHTML = '';
+                previewSlider.style.display = 'none';
+                previewPrev.onclick = null;
+                previewNext.onclick = null;
+            }
+        }
+
+        // Handle unit change
+        function updateUnitLimits() {
+            const heightLabel = document.querySelector('label[for="height"]');
+            const widthLabel = document.querySelector('label[for="width"]');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const unit = document.getElementById('unit').value;
+            heightLabel.textContent = `Tinggi (${unit})`;
+            widthLabel.textContent = `Lebar (${unit})`;
+
+            // Update min and max based on unit
+            if (unit === 'cm') {
+                widthInput.min = 10;
+                widthInput.max = 200;
+                heightInput.min = 10;
+                heightInput.max = 300;
+            } else if (unit === 'mm') {
+                widthInput.min = 100;
+                widthInput.max = 2000;
+                heightInput.min = 100;
+                heightInput.max = 3000;
+            } else if (unit === 'px') {
+                widthInput.min = 1000;
+                widthInput.max = 10000;
+                heightInput.min = 1000;
+                heightInput.max = 15000;
+            }
+        }
+
+        document.getElementById('unit').addEventListener('change', updateUnitLimits);
+        document.getElementById('format').addEventListener('change', updateFormatInfo);
+        document.getElementById('quality').addEventListener('change', updateFormatInfo);
+
+        function updateFormatInfo() {
+            const format = document.getElementById('format').value;
+            const quality = document.getElementById('quality').value;
+            const info = document.getElementById('formatInfo');
+            if (!info) {
+                return;
+            }
+
+            let qualityLabel = 'Sedang';
+            if (quality === 'low') qualityLabel = 'Rendah';
+            if (quality === 'high') qualityLabel = 'Tinggi';
+            if (quality === 'ultra') qualityLabel = 'Sangat HD';
+            if (quality === 'lossless') qualityLabel = 'Lossless';
+
+            if (format === 'png') {
+                info.textContent = `PNG (raster): kualitas ${qualityLabel}. Ukuran file naik tajam saat DPI tinggi.`;
+            } else if (format === 'svg') {
+                info.textContent = 'SVG (vector): tajam di semua ukuran, file relatif kecil–sedang tergantung kompleksitas jalan.';
+            } else if (format === 'pdf') {
+                info.textContent = 'PDF (vector): cocok untuk print, ukuran file biasanya sedang–besar tergantung detail.';
+            } else {
+                info.textContent = '';
+            }
+        }
+
+        const presetSizes = {
+            A6: { width: 10.5, height: 14.8 },
+            A5: { width: 14.8, height: 21.0 },
+            A4: { width: 21.0, height: 29.7 },
+            A3: { width: 29.7, height: 42.0 },
+            A2: { width: 42.0, height: 59.4 },
+            A1: { width: 59.4, height: 84.1 },
+            A0: { width: 84.1, height: 118.9 }
+        };
+
+        const resolutionPresets = {
+            ig: { width: 1080, height: 1080, inches: '3.6 × 3.6' },
+            mobile: { width: 1080, height: 1920, inches: '3.6 × 6.4' },
+            hd: { width: 1920, height: 1080, inches: '6.4 × 3.6' },
+            '4k': { width: 3840, height: 2160, inches: '12.8 × 7.2' },
+            a4px: { width: 2480, height: 3508, inches: '8.3 × 11.7' }
+        };
+
+        function applyPresetSize() {
+            const presetSelect = document.getElementById('preset_size');
+            const orientationSelect = document.getElementById('preset_orientation');
+            const preset = presetSizes[presetSelect.value];
+            if (!preset) {
+                return;
+            }
+            const isLandscape = orientationSelect.value === 'landscape';
+            const width = isLandscape ? preset.height : preset.width;
+            const height = isLandscape ? preset.width : preset.height;
+            document.getElementById('unit').value = 'cm';
+            updateUnitLimits();
+            document.getElementById('width').value = width.toFixed(2);
+            document.getElementById('height').value = height.toFixed(2);
+        }
+
+        function togglePresetSize() {
+            const usePreset = document.getElementById('use_preset_size').checked;
+            const presetGroup = document.getElementById('presetSizeGroup');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const unitSelect = document.getElementById('unit');
+            presetGroup.style.display = usePreset ? 'block' : 'none';
+            widthInput.disabled = usePreset;
+            heightInput.disabled = usePreset;
+            unitSelect.disabled = usePreset;
+            if (usePreset) {
+                applyPresetSize();
+            }
+        }
+
+        document.getElementById('use_preset_size').addEventListener('change', togglePresetSize);
+        document.getElementById('preset_size').addEventListener('change', applyPresetSize);
+        document.getElementById('preset_orientation').addEventListener('change', applyPresetSize);
+
+        function applyResolutionPreset() {
+            const select = document.getElementById('resolution_preset');
+            const preset = resolutionPresets[select.value];
+            if (!preset) return;
+            document.getElementById('unit').value = 'px';
+            updateUnitLimits();
+            document.getElementById('width').value = preset.width;
+            document.getElementById('height').value = preset.height;
+            document.getElementById('resolution_inches').value = preset.inches;
+        }
+
+        function toggleResolutionPreset() {
+            const usePreset = document.getElementById('use_resolution_preset').checked;
+            const group = document.getElementById('resolutionPresetGroup');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const unitSelect = document.getElementById('unit');
+            group.style.display = usePreset ? 'block' : 'none';
+            widthInput.disabled = usePreset;
+            heightInput.disabled = usePreset;
+            unitSelect.disabled = usePreset;
+            if (usePreset) {
+                // turn off A-series preset if active
+                document.getElementById('use_preset_size').checked = false;
+                document.getElementById('presetSizeGroup').style.display = 'none';
+                applyResolutionPreset();
+            }
+        }
+
+        document.getElementById('use_resolution_preset').addEventListener('change', toggleResolutionPreset);
+        document.getElementById('resolution_preset').addEventListener('change', applyResolutionPreset);
+
+        // Handle delineation change
+        document.getElementById('use_delineation').addEventListener('change', function() {
+            const skalaGroup = document.querySelector('label[for="skala"]').parentElement;
+            const boundaryEdgeGroup = document.getElementById('boundary_edge_group');
+            if (this.checked) {
+                skalaGroup.style.display = 'none';
+                boundaryEdgeGroup.style.display = 'block';
+            } else {
+                skalaGroup.style.display = 'block';
+                boundaryEdgeGroup.style.display = 'none';
+            }
+        });
+
+        // Toggle coordinate input
+        document.getElementById('use_coordinates').addEventListener('change', function() {
+            const coordSection = document.getElementById('coordinate_section');
+            const isOn = this.checked;
+            coordSection.style.display = isOn ? 'block' : 'none';
+            document.getElementById('kota').disabled = isOn;
+            document.getElementById('negara').disabled = isOn;
+            document.getElementById('kecamatan').disabled = isOn;
+        });
+
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem('posterHistory');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+
+            if (lastElapsedSeconds) {
+                const elapsedLabel = lastElapsedSeconds < 60 ? `${Math.round(lastElapsedSeconds)}s` : `${Math.floor(lastElapsedSeconds / 60)}m ${Math.round(lastElapsedSeconds % 60)}s`;
+                previewTimeNote.textContent = `Waktu pengerjaan: ${elapsedLabel}`;
+            } else {
+                previewTimeNote.textContent = '';
+            }
+
+            addToHistory(taskId, formData);
+        }
+
+        function saveHistory(items) {
+            try {
+                localStorage.setItem('posterHistory', JSON.stringify(items));
+            } catch (e) {}
+        }
+
+        function renderHistory() {
+            const historySection = document.getElementById('historySection');
+            const historyList = document.getElementById('historyList');
+            const items = loadHistory();
+            historyList.innerHTML = '';
+            if (!items.length) {
+                historySection.style.display = 'none';
+                return;
+            }
+            historySection.style.display = 'block';
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'history-item';
+                const left = document.createElement('div');
+                const title = document.createElement('div');
+                title.textContent = item.label;
+                const meta = document.createElement('small');
+                meta.textContent = `${item.format.toUpperCase()} ? ${new Date(item.createdAt).toLocaleString()}`;
+                left.appendChild(title);
+                left.appendChild(meta);
+                const right = document.createElement('a');
+                right.className = 'btn-download';
+                right.textContent = 'Unduh Ulang';
+                right.href = `/api/download/${item.taskId}?data=${encodeURIComponent(JSON.stringify(item.formData))}&no_compress=1`;
+                right.setAttribute('download', '');
+                row.appendChild(left);
+                row.appendChild(right);
+                historyList.appendChild(row);
+            });
+        }
+
+        function addToHistory(taskId, formData) {
+            const items = loadHistory();
+            const label = formData.kecamatan || formData.custom_city || formData.kota || formData.negara || 'Poster';
+            items.unshift({
+                taskId,
+                formData,
+                label,
+                format: (formData.format || 'png'),
+                createdAt: Date.now()
+            });
+            const trimmed = items.slice(0, 5);
+            saveHistory(trimmed);
+            renderHistory();
+        }
+
+        // Initialize on load
+        updateUnitLimits();
+        updateFormatInfo();
+        renderHistory();
+        togglePresetSize();
+        toggleResolutionPreset();
+
+        // Theme toggle (light/dark)
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        if (storedTheme === 'dark') {
+            document.body.classList.add('theme-dark');
+            document.getElementById('themeToggle').textContent = '☀️ Terang';
+        }
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            const isDark = document.body.classList.toggle('theme-dark');
+            this.textContent = isDark ? '☀️ Terang' : '🌙 Gelap';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>
